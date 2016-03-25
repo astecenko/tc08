@@ -41,7 +41,225 @@ public class MainHandler extends AbstractHandler {
 
 	private Vector<TCComponent> localVector;
 
+	private boolean allItem;
+	private boolean allRelation;
+	private boolean isItemRev;
+
+	private ArrayList<String> itemEqual;
+	private ArrayList<String> itemNotEqual;
+	private ArrayList<String> itemRevisionEqual;
+	private ArrayList<String> itemRevisionNotEqual;
+	private ArrayList<String> relationEqual;
+	private ArrayList<String> relationNotEqual;
+	private ArrayList<String> referencEqual;
+	private ArrayList<String> referencNotEqual;
+
 	public MainHandler() {
+	}
+
+	void checkComponent(InterfaceAIFComponent comp1) {
+		if ((comp1 instanceof TCComponentItem) || (comp1 instanceof TCComponentItemRevision)) {
+
+			boolean itemexst;
+			boolean relatexst;
+			// boolean isItemRev = false;
+			// boolean allItem, allRelation;
+			// allItem = false;
+			// allRelation = false;
+
+			TCComponentItem item1 = null;
+			TCComponentItemRevision itemRev1 = null;
+			AIFComponentContext[] arrayOfAIFCompContext1;
+			if (comp1 instanceof TCComponentItemRevision)
+				try {
+					item1 = ((TCComponentItemRevision)comp1).getItem();	
+				} catch (Exception e) {
+					// TODO: handle exception
+				}				
+			else
+			item1 = (TCComponentItem) comp1;
+			
+			try {
+				itemRev1 = item1.getLatestItemRevision();
+			} catch (Exception e) {
+				// TODO: handle exception
+			}
+			if (allItem) // если все типы то отмечаем что булем проходить по
+				// item
+				itemexst = true;
+			else {
+				itemexst = !((itemEqual.size() > 0) || (itemRevisionEqual
+						.size() > 0));
+				isItemRev = false;
+				if ((!itemEqual.isEmpty()) && (!itemexst)) {
+					for (String str1 : itemEqual) {
+						if (item1.getType().equals(str1)) {
+							itemexst = true;
+							break;
+						}
+					}
+				}
+
+				if ((itemRev1 != null) && (!itemRevisionEqual.isEmpty())
+						&& (!itemexst)) {
+					for (String str1 : itemRevisionEqual) {
+						if (itemRev1.getType().equals(str1)) {
+							itemexst = true;
+							isItemRev = true;
+							break;
+						}
+					}
+				}
+
+				if ((!itemNotEqual.isEmpty()) && (itemexst)) {
+					for (String str1 : itemNotEqual) {
+						if (item1.getType().equals(str1)) {
+							itemexst = false;
+							break;
+						}
+					}
+				}
+
+				if ((itemRev1 != null) && (!itemRevisionNotEqual.isEmpty())
+						&& (itemexst)) {
+					for (String str1 : itemRevisionNotEqual) {
+						if (itemRev1.getType().equals(str1)) {
+							itemexst = false;
+							break;
+						}
+					}
+				}
+			}
+			// если тут itemexst то проверяем связи
+			if (itemexst) {
+				if (allRelation)
+					relatexst = true;
+				else {
+					relatexst = !((relationEqual.size() > 0) || (referencEqual
+							.size() > 0));
+
+					if ((itemRev1 != null) && (isItemRev)) { // проверяем item
+						// revision
+						if ((!relationEqual.isEmpty()) && (!relatexst)) {
+							for (String str1 : relationEqual) {
+								try {
+									if (itemRev1.getRelatedComponent(str1) != null) {
+										relatexst = true;
+										break;
+									}
+								} catch (Exception e) {
+									// TODO: handle exception
+								}
+
+							}
+						}
+						try {
+							if ((itemRev1 != null)
+									&& (!referencEqual.isEmpty())
+									&& (!relatexst)
+									&& (itemRev1.getWhereReferencedCount() > 0)) {
+								for (String str1 : referencEqual) {
+									arrayOfAIFCompContext1 = itemRev1
+											.whereReferenced();
+									for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
+										if (compContext1
+												.getContextDisplayName()
+												.equals(str1)) {
+											relatexst = true;
+											break;
+										}
+									}
+								}
+							}
+
+							if ((!relationNotEqual.isEmpty()) && (relatexst)) {
+								for (String str1 : relationNotEqual) {
+									if (itemRev1.getRelatedComponent(str1) != null) {
+										relatexst = false;
+										break;
+									}
+								}
+							}
+
+							if ((!referencNotEqual.isEmpty()) && (relatexst)
+									&& (itemRev1.getWhereReferencedCount() > 0)) {
+								for (String str1 : referencNotEqual) {
+									arrayOfAIFCompContext1 = itemRev1
+											.whereReferenced();
+									for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
+										if (compContext1
+												.getContextDisplayName()
+												.equals(str1)) {
+											relatexst = false;
+											break;
+										}
+									}
+								}
+							}
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+
+					} else { // проверяем item
+						try {
+							if ((!relationEqual.isEmpty()) && (!relatexst)) {
+								for (String str1 : relationEqual) {
+									if (item1.getRelatedComponent(str1) != null) {
+										relatexst = true;
+										break;
+									}
+								}
+							}
+
+							if ((!referencEqual.isEmpty()) && (!relatexst)
+									&& (item1.getWhereReferencedCount() > 0)) {
+								for (String str1 : referencEqual) {
+									arrayOfAIFCompContext1 = item1
+											.whereReferenced();
+									for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
+										if (compContext1
+												.getContextDisplayName()
+												.equals(str1)) {
+											relatexst = true;
+											break;
+										}
+									}
+								}
+							}
+
+							if ((!referencNotEqual.isEmpty()) && (relatexst)) {
+								for (String str1 : relationNotEqual) {
+									if (item1.getRelatedComponent(str1) != null) {
+										relatexst = false;
+										break;
+									}
+								}
+							}
+
+							if ((!referencNotEqual.isEmpty()) && (relatexst)
+									&& (item1.getWhereReferencedCount() > 0)) {
+								for (String str1 : referencNotEqual) {
+									arrayOfAIFCompContext1 = item1
+											.whereReferenced();
+									for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
+										if (compContext1
+												.getContextDisplayName()
+												.equals(str1)) {
+											relatexst = false;
+											break;
+										}
+									}
+								}
+							}
+						} catch (Exception e) {
+							// TODO: handle exception
+						}
+					}
+				}
+				if (relatexst)
+					localVector.addElement(item1);
+			}
+		}
 	}
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
@@ -69,25 +287,24 @@ public class MainHandler extends AbstractHandler {
 		int retVal = myDialog.open();
 		if (retVal == Window.OK) {
 			retVal = myDialog.getReturnCode();
-			ArrayList<String> itemEqual = new ArrayList<String>();
-			ArrayList<String> itemNotEqual = new ArrayList<String>();
-			ArrayList<String> itemRevisionEqual = new ArrayList<String>();
-			ArrayList<String> itemRevisionNotEqual = new ArrayList<String>();
-			ArrayList<String> relationEqual = new ArrayList<String>();
-			ArrayList<String> relationNotEqual = new ArrayList<String>();
-			ArrayList<String> referencEqual = new ArrayList<String>();
-			ArrayList<String> referencNotEqual = new ArrayList<String>();
+			itemEqual = new ArrayList<String>();
+			itemNotEqual = new ArrayList<String>();
+			itemRevisionEqual = new ArrayList<String>();
+			itemRevisionNotEqual = new ArrayList<String>();
+			relationEqual = new ArrayList<String>();
+			relationNotEqual = new ArrayList<String>();
+			referencEqual = new ArrayList<String>();
+			referencNotEqual = new ArrayList<String>();
 
-			boolean itemexst;
-			boolean relatexst;
-			boolean isItemRev = false;
-			boolean allItem, allRelation;
+			// boolean itemexst;
+			// boolean relatexst;
+			isItemRev = false;
 			allItem = false;
 			allRelation = false;
 
-			TCComponentItem item1;
-			TCComponentItemRevision itemRev1;
-			AIFComponentContext[] arrayOfAIFCompContext1;
+			// TCComponentItem item1;
+			// TCComponentItemRevision itemRev1;
+			// AIFComponentContext[] arrayOfAIFCompContext1;
 
 			listTypes = listTypes[retVal].split(sDelimiter);
 			listRelations = listRelations[retVal].split(sDelimiter);
@@ -105,7 +322,7 @@ public class MainHandler extends AbstractHandler {
 						if (str.startsWith(sOtherVariant, 1)) {
 							isItemRev = true;
 							itemRevisionEqual.add(str);
-						}							
+						}
 						itemEqual.add(str);
 					} else if (str.startsWith(sOtherVariant))
 						itemRevisionEqual.add(str.substring(1));
@@ -143,218 +360,100 @@ public class MainHandler extends AbstractHandler {
 							for (AIFComponentContext interAIFCompCont1 : ((TCComponentFolder) interfaceAIFComponent)
 									.getChildren()) {
 
-								if (interAIFCompCont1.getComponent() instanceof TCComponentItem) {
-
-									item1 = (TCComponentItem) interAIFCompCont1
-											.getComponent();
-									itemRev1 = item1.getLatestItemRevision();
-									if (allItem)
-										itemexst = true;
-									else {
-										itemexst = !((itemEqual.size() > 0) || (itemRevisionEqual
-												.size() > 0));
-										isItemRev = false;
-										/*
-										 * if ((interAIFCompCont1.getComponent()
-										 * instanceof TCComponentItem)
-										 * 
-										 * && (((TCComponentItem)
-										 * interAIFCompCont1
-										 * .getComponent()).getType()
-										 * .equals("H47_Standart_Izd")) &&
-										 * (((TCComponentItem) interAIFCompCont1
-										 * .getComponent())
-										 * .getLatestItemRevision()
-										 * .getRelatedComponent( sPropMaterial)
-										 * == null))
-										 */
-
-										if ((!itemEqual.isEmpty())
-												&& (!itemexst)) {
-											for (String str1 : itemEqual) {
-												if (item1.getType()
-														.equals(str1)) {
-													itemexst = true;
-													break;
-												}
-											}
-										}
-
-										if ((!itemRevisionEqual.isEmpty())
-												&& (!itemexst)) {
-											for (String str1 : itemRevisionEqual) {
-												if (itemRev1.getType().equals(
-														str1)) {
-													itemexst = true;
-													isItemRev = true;
-													break;
-												}
-											}
-										}
-
-										if ((!itemNotEqual.isEmpty())
-												&& (itemexst)) {
-											for (String str1 : itemNotEqual) {
-												if (item1.getType()
-														.equals(str1)) {
-													itemexst = false;
-													break;
-												}
-											}
-										}
-
-										if ((!itemRevisionNotEqual.isEmpty())
-												&& (itemexst)) {
-											for (String str1 : itemRevisionNotEqual) {
-												if (itemRev1.getType().equals(
-														str1)) {
-													itemexst = false;
-													break;
-												}
-											}
-										}
-									}
-									// если тут itemexst то проверяем связи
-									if (itemexst) {
-										if (allRelation)
-											relatexst = true;
-										else {
-											relatexst = !((relationEqual.size() > 0) || (referencEqual
-													.size() > 0));
-
-											if (isItemRev) { // проверяем item
-												// revision
-												if ((!relationEqual.isEmpty())
-														&& (!relatexst)) {
-													for (String str1 : relationEqual) {
-														if (itemRev1
-																.getRelatedComponent(str1) != null) {
-															relatexst = true;
-															break;
-														}
-													}
-												}
-
-												if ((!referencEqual.isEmpty())
-														&& (!relatexst)
-														&& (itemRev1
-																.getWhereReferencedCount() > 0)) {
-													for (String str1 : referencEqual) {
-														arrayOfAIFCompContext1 = itemRev1
-																.whereReferenced();
-														for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
-															if (compContext1
-																	.getContextDisplayName()
-																	.equals(
-																			str1)) {
-																relatexst = true;
-																break;
-															}
-														}
-													}
-												}
-
-												if ((!relationNotEqual
-														.isEmpty())
-														&& (relatexst)) {
-													for (String str1 : relationNotEqual) {
-														if (itemRev1
-																.getRelatedComponent(str1) != null) {
-															relatexst = false;
-															break;
-														}
-													}
-												}
-
-												if ((!referencNotEqual
-														.isEmpty())
-														&& (relatexst)
-														&& (itemRev1
-																.getWhereReferencedCount() > 0)) {
-													for (String str1 : referencNotEqual) {
-														arrayOfAIFCompContext1 = itemRev1
-																.whereReferenced();
-														for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
-															if (compContext1
-																	.getContextDisplayName()
-																	.equals(
-																			str1)) {
-																relatexst = false;
-																break;
-															}
-														}
-													}
-												}
-											} else { // проверяем item
-												if ((!relationEqual.isEmpty())
-														&& (!relatexst)) {
-													for (String str1 : relationEqual) {
-														if (item1
-																.getRelatedComponent(str1) != null) {
-															relatexst = true;
-															break;
-														}
-													}
-												}
-
-												if ((!referencEqual.isEmpty())
-														&& (!relatexst)
-														&& (item1
-																.getWhereReferencedCount() > 0)) {
-													for (String str1 : referencEqual) {
-														arrayOfAIFCompContext1 = item1
-																.whereReferenced();
-														for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
-															if (compContext1
-																	.getContextDisplayName()
-																	.equals(
-																			str1)) {
-																relatexst = true;
-																break;
-															}
-														}
-													}
-												}
-
-												if ((!referencNotEqual
-														.isEmpty())
-														&& (relatexst)) {
-													for (String str1 : relationNotEqual) {
-														if (item1
-																.getRelatedComponent(str1) != null) {
-															relatexst = false;
-															break;
-														}
-													}
-												}
-
-												if ((!referencNotEqual
-														.isEmpty())
-														&& (relatexst)
-														&& (item1
-																.getWhereReferencedCount() > 0)) {
-													for (String str1 : referencNotEqual) {
-														arrayOfAIFCompContext1 = item1
-																.whereReferenced();
-														for (AIFComponentContext compContext1 : arrayOfAIFCompContext1) {
-															if (compContext1
-																	.getContextDisplayName()
-																	.equals(
-																			str1)) {
-																relatexst = false;
-																break;
-															}
-														}
-													}
-												}
-											}
-										}
-										if (relatexst)
-											localVector.addElement(item1);
-									}
-								}
+								checkComponent(interAIFCompCont1.getComponent());
 							}
-						}
+						} else if (interfaceAIFComponent instanceof TCComponentItem)
+							checkComponent(interfaceAIFComponent);
+						else if (interfaceAIFComponent instanceof TCComponentItemRevision)
+							checkComponent(((TCComponentItemRevision)interfaceAIFComponent).getItem());
+						/*
+						 * if (interAIFCompCont1.getComponent() instanceof
+						 * TCComponentItem) {
+						 * 
+						 * item1 = (TCComponentItem) interAIFCompCont1
+						 * .getComponent(); itemRev1 =
+						 * item1.getLatestItemRevision(); if (allItem) itemexst
+						 * = true; else { itemexst = !((itemEqual.size() > 0) ||
+						 * (itemRevisionEqual .size() > 0)); isItemRev = false;
+						 * 
+						 * if ((!itemEqual.isEmpty()) && (!itemexst)) { for
+						 * (String str1 : itemEqual) { if (item1.getType()
+						 * .equals(str1)) { itemexst = true; break; } } }
+						 * 
+						 * if ((!itemRevisionEqual.isEmpty()) && (!itemexst)) {
+						 * for (String str1 : itemRevisionEqual) { if
+						 * (itemRev1.getType().equals( str1)) { itemexst = true;
+						 * isItemRev = true; break; } } }
+						 * 
+						 * if ((!itemNotEqual.isEmpty()) && (itemexst)) { for
+						 * (String str1 : itemNotEqual) { if (item1.getType()
+						 * .equals(str1)) { itemexst = false; break; } } }
+						 * 
+						 * if ((!itemRevisionNotEqual.isEmpty()) && (itemexst))
+						 * { for (String str1 : itemRevisionNotEqual) { if
+						 * (itemRev1.getType().equals( str1)) { itemexst =
+						 * false; break; } } } } // если тут itemexst то
+						 * проверяем связи if (itemexst) { if (allRelation)
+						 * relatexst = true; else { relatexst =
+						 * !((relationEqual.size() > 0) || (referencEqual
+						 * .size() > 0));
+						 * 
+						 * if (isItemRev) { // проверяем item // revision if
+						 * ((!relationEqual.isEmpty()) && (!relatexst)) { for
+						 * (String str1 : relationEqual) { if (itemRev1
+						 * .getRelatedComponent(str1) != null) { relatexst =
+						 * true; break; } } }
+						 * 
+						 * if ((!referencEqual.isEmpty()) && (!relatexst) &&
+						 * (itemRev1 .getWhereReferencedCount() > 0)) { for
+						 * (String str1 : referencEqual) {
+						 * arrayOfAIFCompContext1 = itemRev1 .whereReferenced();
+						 * for (AIFComponentContext compContext1 :
+						 * arrayOfAIFCompContext1) { if (compContext1
+						 * .getContextDisplayName() .equals( str1)) { relatexst
+						 * = true; break; } } } }
+						 * 
+						 * if ((!relationNotEqual .isEmpty()) && (relatexst)) {
+						 * for (String str1 : relationNotEqual) { if (itemRev1
+						 * .getRelatedComponent(str1) != null) { relatexst =
+						 * false; break; } } }
+						 * 
+						 * if ((!referencNotEqual .isEmpty()) && (relatexst) &&
+						 * (itemRev1 .getWhereReferencedCount() > 0)) { for
+						 * (String str1 : referencNotEqual) {
+						 * arrayOfAIFCompContext1 = itemRev1 .whereReferenced();
+						 * for (AIFComponentContext compContext1 :
+						 * arrayOfAIFCompContext1) { if (compContext1
+						 * .getContextDisplayName() .equals( str1)) { relatexst
+						 * = false; break; } } } } } else { // проверяем item if
+						 * ((!relationEqual.isEmpty()) && (!relatexst)) { for
+						 * (String str1 : relationEqual) { if (item1
+						 * .getRelatedComponent(str1) != null) { relatexst =
+						 * true; break; } } }
+						 * 
+						 * if ((!referencEqual.isEmpty()) && (!relatexst) &&
+						 * (item1 .getWhereReferencedCount() > 0)) { for (String
+						 * str1 : referencEqual) { arrayOfAIFCompContext1 =
+						 * item1 .whereReferenced(); for (AIFComponentContext
+						 * compContext1 : arrayOfAIFCompContext1) { if
+						 * (compContext1 .getContextDisplayName() .equals(
+						 * str1)) { relatexst = true; break; } } } }
+						 * 
+						 * if ((!referencNotEqual .isEmpty()) && (relatexst)) {
+						 * for (String str1 : relationNotEqual) { if (item1
+						 * .getRelatedComponent(str1) != null) { relatexst =
+						 * false; break; } } }
+						 * 
+						 * if ((!referencNotEqual .isEmpty()) && (relatexst) &&
+						 * (item1 .getWhereReferencedCount() > 0)) { for (String
+						 * str1 : referencNotEqual) { arrayOfAIFCompContext1 =
+						 * item1 .whereReferenced(); for (AIFComponentContext
+						 * compContext1 : arrayOfAIFCompContext1) { if
+						 * (compContext1 .getContextDisplayName() .equals(
+						 * str1)) { relatexst = false; break; } } } } } } if
+						 * (relatexst) localVector.addElement(item1); } }
+						 */
+
 					} catch (Exception e) {
 						// TODO: handle exception
 					}
