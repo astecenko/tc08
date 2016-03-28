@@ -57,8 +57,34 @@ public class MainHandler extends AbstractHandler {
 	public MainHandler() {
 	}
 
+	void checkComponent2(InterfaceAIFComponent comp1) {
+		try {
+			if (comp1 instanceof TCComponentFolder) {
+				for (AIFComponentContext interAIFCompCont1 : ((TCComponentFolder) comp1)
+						.getChildren()) {
+
+					checkComponent2(interAIFCompCont1.getComponent());
+				}
+			} else {
+				if (comp1 instanceof TCComponentItem)
+					checkComponent(comp1);
+				else if (comp1 instanceof TCComponentItemRevision)
+					checkComponent(((TCComponentItemRevision) comp1).getItem());
+				
+				if ((comp1 instanceof TCComponentItem) || (comp1 instanceof TCComponentItemRevision))
+				for (AIFComponentContext interAIFCompCont1 :  comp1.getChildren()) {
+					checkComponent2(interAIFCompCont1.getComponent());
+				}
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+
+	}
+
 	void checkComponent(InterfaceAIFComponent comp1) {
-		if ((comp1 instanceof TCComponentItem) || (comp1 instanceof TCComponentItemRevision)) {
+		if ((comp1 instanceof TCComponentItem)
+				|| (comp1 instanceof TCComponentItemRevision)) {
 
 			boolean itemexst;
 			boolean relatexst;
@@ -72,13 +98,13 @@ public class MainHandler extends AbstractHandler {
 			AIFComponentContext[] arrayOfAIFCompContext1;
 			if (comp1 instanceof TCComponentItemRevision)
 				try {
-					item1 = ((TCComponentItemRevision)comp1).getItem();	
+					item1 = ((TCComponentItemRevision) comp1).getItem();
 				} catch (Exception e) {
 					// TODO: handle exception
-				}				
+				}
 			else
-			item1 = (TCComponentItem) comp1;
-			
+				item1 = (TCComponentItem) comp1;
+
 			try {
 				itemRev1 = item1.getLatestItemRevision();
 			} catch (Exception e) {
@@ -131,7 +157,7 @@ public class MainHandler extends AbstractHandler {
 				}
 			}
 			// если тут itemexst то проверяем связи
-			if (itemexst) {
+			if ((itemexst)&& (!localVector.contains(item1))) {
 				if (allRelation)
 					relatexst = true;
 				else {
@@ -356,7 +382,8 @@ public class MainHandler extends AbstractHandler {
 			if (c_targets != null) {
 				for (InterfaceAIFComponent interfaceAIFComponent : c_targets) {
 					try {
-						if (interfaceAIFComponent instanceof TCComponentFolder) {
+						checkComponent2(interfaceAIFComponent);
+						/*if (interfaceAIFComponent instanceof TCComponentFolder) {
 							for (AIFComponentContext interAIFCompCont1 : ((TCComponentFolder) interfaceAIFComponent)
 									.getChildren()) {
 
@@ -365,7 +392,9 @@ public class MainHandler extends AbstractHandler {
 						} else if (interfaceAIFComponent instanceof TCComponentItem)
 							checkComponent(interfaceAIFComponent);
 						else if (interfaceAIFComponent instanceof TCComponentItemRevision)
-							checkComponent(((TCComponentItemRevision)interfaceAIFComponent).getItem());
+							checkComponent(((TCComponentItemRevision) interfaceAIFComponent)
+									.getItem());  */
+
 						/*
 						 * if (interAIFCompCont1.getComponent() instanceof
 						 * TCComponentItem) {
@@ -460,6 +489,7 @@ public class MainHandler extends AbstractHandler {
 				}
 			}
 			if (!localVector.isEmpty()) {
+				
 				AIFClipboard localAIFClipboard = AIFPortal.getClipboard();
 				AIFTransferable localAIFTransferable = new AIFTransferable(
 						localVector);
