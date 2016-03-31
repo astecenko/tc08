@@ -30,7 +30,7 @@ public class MainHandler extends AbstractHandler {
 	public static final String sNotEqual = "!";
 	public static final String sDelimiter = ";";
 	public static final String sOtherVariant = "+";
-	public static final String sAllVariant = "*";
+	public static final String sAllVariant = "*"; 
 
 	public static final String sPrefTypes = "RVT_TC08_TYPES";
 	public static final String sPrefRelations = "RVT_TC08_RELATIONS";
