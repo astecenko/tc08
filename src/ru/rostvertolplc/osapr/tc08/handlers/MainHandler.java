@@ -21,6 +21,8 @@ import com.teamcenter.rac.kernel.TCComponent;
 import com.teamcenter.rac.kernel.TCComponentFolder;
 import com.teamcenter.rac.kernel.TCComponentItem;
 import com.teamcenter.rac.kernel.TCComponentItemRevision;
+import com.teamcenter.rac.kernel.TCComponentPseudoFolder;
+import com.teamcenter.rac.util.MessageBox;
 
 import ru.rostvertolplc.osapr.helpers.*;
 import ru.rostvertolplc.osapr.tc08.components.SelectDialog;
@@ -30,7 +32,7 @@ public class MainHandler extends AbstractHandler {
 	public static final String sNotEqual = "!";
 	public static final String sDelimiter = ";";
 	public static final String sOtherVariant = "+";
-	public static final String sAllVariant = "*"; 
+	public static final String sAllVariant = "*";
 
 	public static final String sPrefTypes = "RVT_TC08_TYPES";
 	public static final String sPrefRelations = "RVT_TC08_RELATIONS";
@@ -57,24 +59,24 @@ public class MainHandler extends AbstractHandler {
 	public MainHandler() {
 	}
 
-	void checkComponent2(InterfaceAIFComponent comp1) {
+	void checkComponent2(InterfaceAIFComponent comp1) {		
 		try {
-			if (comp1 instanceof TCComponentFolder) {
-				for (AIFComponentContext interAIFCompCont1 : ((TCComponentFolder) comp1)
-						.getChildren()) {
-
+			if ((comp1 instanceof TCComponentFolder)
+					|| ((comp1 instanceof TCComponentPseudoFolder) && (comp1.toString().equals("View"))))
+				for (AIFComponentContext interAIFCompCont1 : comp1.getChildren())
 					checkComponent2(interAIFCompCont1.getComponent());
-				}
-			} else {
+			else {
 				if (comp1 instanceof TCComponentItem)
 					checkComponent(comp1);
 				else if (comp1 instanceof TCComponentItemRevision)
 					checkComponent(((TCComponentItemRevision) comp1).getItem());
-				
-				if ((comp1 instanceof TCComponentItem) || (comp1 instanceof TCComponentItemRevision))
-				for (AIFComponentContext interAIFCompCont1 :  comp1.getChildren()) {
-					checkComponent2(interAIFCompCont1.getComponent());
-				}
+
+				if ((comp1 instanceof TCComponentItem)
+						|| (comp1 instanceof TCComponentItemRevision))
+					for (AIFComponentContext interAIFCompCont1 : comp1
+							.getChildren()) {
+						checkComponent2(interAIFCompCont1.getComponent());
+					}
 			}
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -157,7 +159,7 @@ public class MainHandler extends AbstractHandler {
 				}
 			}
 			// если тут itemexst то проверяем связи
-			if ((itemexst)&& (!localVector.contains(item1))) {
+			if ((itemexst) && (!localVector.contains(item1))) {
 				if (allRelation)
 					relatexst = true;
 				else {
@@ -383,17 +385,21 @@ public class MainHandler extends AbstractHandler {
 				for (InterfaceAIFComponent interfaceAIFComponent : c_targets) {
 					try {
 						checkComponent2(interfaceAIFComponent);
-						/*if (interfaceAIFComponent instanceof TCComponentFolder) {
-							for (AIFComponentContext interAIFCompCont1 : ((TCComponentFolder) interfaceAIFComponent)
-									.getChildren()) {
-
-								checkComponent(interAIFCompCont1.getComponent());
-							}
-						} else if (interfaceAIFComponent instanceof TCComponentItem)
-							checkComponent(interfaceAIFComponent);
-						else if (interfaceAIFComponent instanceof TCComponentItemRevision)
-							checkComponent(((TCComponentItemRevision) interfaceAIFComponent)
-									.getItem());  */
+						/*
+						 * if (interfaceAIFComponent instanceof
+						 * TCComponentFolder) { for (AIFComponentContext
+						 * interAIFCompCont1 : ((TCComponentFolder)
+						 * interfaceAIFComponent) .getChildren()) {
+						 * 
+						 * checkComponent(interAIFCompCont1.getComponent()); } }
+						 * else if (interfaceAIFComponent instanceof
+						 * TCComponentItem)
+						 * checkComponent(interfaceAIFComponent); else if
+						 * (interfaceAIFComponent instanceof
+						 * TCComponentItemRevision)
+						 * checkComponent(((TCComponentItemRevision)
+						 * interfaceAIFComponent) .getItem());
+						 */
 
 						/*
 						 * if (interAIFCompCont1.getComponent() instanceof
@@ -489,12 +495,17 @@ public class MainHandler extends AbstractHandler {
 				}
 			}
 			if (!localVector.isEmpty()) {
-				
+
 				AIFClipboard localAIFClipboard = AIFPortal.getClipboard();
 				AIFTransferable localAIFTransferable = new AIFTransferable(
 						localVector);
 				localAIFClipboard.setContents(localAIFTransferable, null);
-			}
+				
+				MessageBox.post("Обнаружено соответствующих условию поиска  и скопировано, объектов: " + Integer.toString(localVector.size()), "Teamcenter",
+						MessageBox.INFORMATION);			
+			} else
+				MessageBox.post("Объектов соответствующих условию поиска не обнаружено!", "Teamcenter",
+						MessageBox.INFORMATION);
 		}
 		return null;
 	}
