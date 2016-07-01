@@ -46,6 +46,9 @@ public class MainHandler extends AbstractHandler {
 	private boolean allItem;
 	private boolean allRelation;
 	private boolean isItemRev;
+	private TCComponentItem item1;
+	private TCComponentItemRevision itemRev1;
+	private AIFComponentContext[] arrayOfAIFCompContext1;
 
 	private ArrayList<String> itemEqual;
 	private ArrayList<String> itemNotEqual;
@@ -59,7 +62,7 @@ public class MainHandler extends AbstractHandler {
 	public MainHandler() {
 	}
 
-	void checkComponent2(InterfaceAIFComponent comp1) {		
+	void checkComponent2(InterfaceAIFComponent comp1) {
 		try {
 			if ((comp1 instanceof TCComponentFolder)
 					|| ((comp1 instanceof TCComponentPseudoFolder) && (comp1.toString().equals("View"))))
@@ -95,9 +98,10 @@ public class MainHandler extends AbstractHandler {
 			// allItem = false;
 			// allRelation = false;
 
-			TCComponentItem item1 = null;
-			TCComponentItemRevision itemRev1 = null;
-			AIFComponentContext[] arrayOfAIFCompContext1;
+			item1 = null;
+			itemRev1 = null;
+			
+			arrayOfAIFCompContext1 = null;
 			if (comp1 instanceof TCComponentItemRevision)
 				try {
 					item1 = ((TCComponentItemRevision) comp1).getItem();
@@ -106,7 +110,6 @@ public class MainHandler extends AbstractHandler {
 				}
 			else
 				item1 = (TCComponentItem) comp1;
-
 			try {
 				itemRev1 = item1.getLatestItemRevision();
 			} catch (Exception e) {
@@ -178,7 +181,6 @@ public class MainHandler extends AbstractHandler {
 								} catch (Exception e) {
 									// TODO: handle exception
 								}
-
 							}
 						}
 						try {
@@ -314,7 +316,7 @@ public class MainHandler extends AbstractHandler {
 				IMessageProvider.INFORMATION);
 		int retVal = myDialog.open();
 		if (retVal == Window.OK) {
-			retVal = myDialog.getReturnCode();
+			retVal = myDialog.getSelectionIndex();
 			itemEqual = new ArrayList<String>();
 			itemNotEqual = new ArrayList<String>();
 			itemRevisionEqual = new ArrayList<String>();
@@ -390,7 +392,7 @@ public class MainHandler extends AbstractHandler {
 						 * TCComponentFolder) { for (AIFComponentContext
 						 * interAIFCompCont1 : ((TCComponentFolder)
 						 * interfaceAIFComponent) .getChildren()) {
-						 * 
+						 *
 						 * checkComponent(interAIFCompCont1.getComponent()); } }
 						 * else if (interfaceAIFComponent instanceof
 						 * TCComponentItem)
@@ -404,26 +406,26 @@ public class MainHandler extends AbstractHandler {
 						/*
 						 * if (interAIFCompCont1.getComponent() instanceof
 						 * TCComponentItem) {
-						 * 
+						 *
 						 * item1 = (TCComponentItem) interAIFCompCont1
 						 * .getComponent(); itemRev1 =
 						 * item1.getLatestItemRevision(); if (allItem) itemexst
 						 * = true; else { itemexst = !((itemEqual.size() > 0) ||
 						 * (itemRevisionEqual .size() > 0)); isItemRev = false;
-						 * 
+						 *
 						 * if ((!itemEqual.isEmpty()) && (!itemexst)) { for
 						 * (String str1 : itemEqual) { if (item1.getType()
 						 * .equals(str1)) { itemexst = true; break; } } }
-						 * 
+						 *
 						 * if ((!itemRevisionEqual.isEmpty()) && (!itemexst)) {
 						 * for (String str1 : itemRevisionEqual) { if
 						 * (itemRev1.getType().equals( str1)) { itemexst = true;
 						 * isItemRev = true; break; } } }
-						 * 
+						 *
 						 * if ((!itemNotEqual.isEmpty()) && (itemexst)) { for
 						 * (String str1 : itemNotEqual) { if (item1.getType()
 						 * .equals(str1)) { itemexst = false; break; } } }
-						 * 
+						 *
 						 * if ((!itemRevisionNotEqual.isEmpty()) && (itemexst))
 						 * { for (String str1 : itemRevisionNotEqual) { if
 						 * (itemRev1.getType().equals( str1)) { itemexst =
@@ -432,13 +434,13 @@ public class MainHandler extends AbstractHandler {
 						 * relatexst = true; else { relatexst =
 						 * !((relationEqual.size() > 0) || (referencEqual
 						 * .size() > 0));
-						 * 
+						 *
 						 * if (isItemRev) { // проверяем item // revision if
 						 * ((!relationEqual.isEmpty()) && (!relatexst)) { for
 						 * (String str1 : relationEqual) { if (itemRev1
 						 * .getRelatedComponent(str1) != null) { relatexst =
 						 * true; break; } } }
-						 * 
+						 *
 						 * if ((!referencEqual.isEmpty()) && (!relatexst) &&
 						 * (itemRev1 .getWhereReferencedCount() > 0)) { for
 						 * (String str1 : referencEqual) {
@@ -447,12 +449,12 @@ public class MainHandler extends AbstractHandler {
 						 * arrayOfAIFCompContext1) { if (compContext1
 						 * .getContextDisplayName() .equals( str1)) { relatexst
 						 * = true; break; } } } }
-						 * 
+						 *
 						 * if ((!relationNotEqual .isEmpty()) && (relatexst)) {
 						 * for (String str1 : relationNotEqual) { if (itemRev1
 						 * .getRelatedComponent(str1) != null) { relatexst =
 						 * false; break; } } }
-						 * 
+						 *
 						 * if ((!referencNotEqual .isEmpty()) && (relatexst) &&
 						 * (itemRev1 .getWhereReferencedCount() > 0)) { for
 						 * (String str1 : referencNotEqual) {
@@ -465,7 +467,7 @@ public class MainHandler extends AbstractHandler {
 						 * (String str1 : relationEqual) { if (item1
 						 * .getRelatedComponent(str1) != null) { relatexst =
 						 * true; break; } } }
-						 * 
+						 *
 						 * if ((!referencEqual.isEmpty()) && (!relatexst) &&
 						 * (item1 .getWhereReferencedCount() > 0)) { for (String
 						 * str1 : referencEqual) { arrayOfAIFCompContext1 =
@@ -473,12 +475,12 @@ public class MainHandler extends AbstractHandler {
 						 * compContext1 : arrayOfAIFCompContext1) { if
 						 * (compContext1 .getContextDisplayName() .equals(
 						 * str1)) { relatexst = true; break; } } } }
-						 * 
+						 *
 						 * if ((!referencNotEqual .isEmpty()) && (relatexst)) {
 						 * for (String str1 : relationNotEqual) { if (item1
 						 * .getRelatedComponent(str1) != null) { relatexst =
 						 * false; break; } } }
-						 * 
+						 *
 						 * if ((!referencNotEqual .isEmpty()) && (relatexst) &&
 						 * (item1 .getWhereReferencedCount() > 0)) { for (String
 						 * str1 : referencNotEqual) { arrayOfAIFCompContext1 =
@@ -500,9 +502,9 @@ public class MainHandler extends AbstractHandler {
 				AIFTransferable localAIFTransferable = new AIFTransferable(
 						localVector);
 				localAIFClipboard.setContents(localAIFTransferable, null);
-				
+
 				MessageBox.post("Обнаружено соответствующих условию поиска  и скопировано, объектов: " + Integer.toString(localVector.size()), "Teamcenter",
-						MessageBox.INFORMATION);			
+						MessageBox.INFORMATION);
 			} else
 				MessageBox.post("Объектов соответствующих условию поиска не обнаружено!", "Teamcenter",
 						MessageBox.INFORMATION);

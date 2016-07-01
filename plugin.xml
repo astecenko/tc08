@@ -10,7 +10,7 @@
       <command
             name="Поиск и копирование в буфер обмена объектов по связям"
             categoryId="ru.rostvertolplc.osapr.commands.category"
-            id="ru.rostvertolplc.osapr.tc08.commands.mainCommand">            
+            id="ru.rostvertolplc.osapr.tc08.commands.mainCommand">
       </command>
    </extension>
    <extension
@@ -29,26 +29,17 @@
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
       </key>
    </extension>
-   
+
    <extension point="org.eclipse.ui.menus">
 
 		<menuContribution locationURI="menu:org.eclipse.ui.main.menu">
 			<menu id="RVT.userMenu" label="Инструменты РВТ">
 				<command commandId="ru.rostvertolplc.osapr.tc08.commands.mainCommand">
 					<visibleWhen>
-						<and>
-  							<reference definitionId="com.teamcenter.rac.myteamcenter.inMainViewOrPerspective" /> 
-							<with variable="rac_command_suppression">
-								<not>
-									<iterate operator="or">
-  										<equals value="com.teamcenter.rac.addPartToProduct" /> 
-  									</iterate>
-  								</not>
-  							</with>
-  						</and>
+						<reference definitionId="com.teamcenter.rac.ui.inMainPerspective" />
   					</visibleWhen>
-				</command>	       		   
-			</menu> 
-		</menuContribution> 
+				</command>
+			</menu>
+		</menuContribution>
     </extension>
 </plugin>
